@@ -6,6 +6,7 @@ import '../services/database_helper.dart';
 import '../services/localization_service.dart';
 import '../services/app_theme.dart';
 import '../models/customer.dart';
+import '../services/responsive.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   final AppStrings strings;
@@ -190,10 +191,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
             ),
             // Form
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Form(
-                key: _formKey,
+            Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 600),
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _formKey,
                 child: Column(
                   children: [
                     // Name field
@@ -324,6 +327,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                       ),
                     ),
                   ],
+                ),
                 ),
               ),
             ),

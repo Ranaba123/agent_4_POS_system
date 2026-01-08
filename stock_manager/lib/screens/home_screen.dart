@@ -9,6 +9,7 @@ import '../models/customer.dart';
 import 'calculator_screen.dart';
 import 'add_customer_screen.dart';
 import 'income_details_screen.dart';
+import '../services/responsive.dart';
 
 class HomeScreen extends StatefulWidget {
   final AppStrings strings;
@@ -268,20 +269,42 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Column(
       children: [
-        _buildSummaryCard(isDark),
+        Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: _buildSummaryCard(isDark),
+          ),
+        ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _refreshData,
-            child: ListView.builder(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
-              itemCount: _customersWithBalance.length,
-              itemBuilder: (context, index) {
-                final item = _customersWithBalance[index];
-                final Customer customer = item['customer'];
-                final double balance = item['balance'];
-                return _buildCustomerCard(customer, balance, index, isDark);
-              },
-            ),
+            child: Responsive.isMobile(context)
+                ? ListView.builder(
+                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
+                    itemCount: _customersWithBalance.length,
+                    itemBuilder: (context, index) {
+                      final item = _customersWithBalance[index];
+                      final Customer customer = item['customer'];
+                      final double balance = item['balance'];
+                      return _buildCustomerCard(customer, balance, index, isDark);
+                    },
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: Responsive.isDesktop(context) ? 3 : 2,
+                      childAspectRatio: 2.5,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: _customersWithBalance.length,
+                    itemBuilder: (context, index) {
+                      final item = _customersWithBalance[index];
+                      final Customer customer = item['customer'];
+                      final double balance = item['balance'];
+                      return _buildCustomerCard(customer, balance, index, isDark);
+                    },
+                  ),
           ),
         ),
       ],

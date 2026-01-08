@@ -8,6 +8,7 @@ import '../models/transaction_model.dart';
 import '../services/database_helper.dart';
 import '../services/localization_service.dart';
 import '../services/app_theme.dart';
+import '../services/responsive.dart';
 
 class CalculatorScreen extends StatefulWidget {
   final Customer customer;
@@ -588,216 +589,253 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildHeader(BuildContext context) {
     final isDark = widget.isDarkMode;
     final primaryColor = isDark ? AppTheme.primaryDark : AppTheme.primaryLight;
-    final bgColor = isDark ? AppTheme.darkBackground : AppTheme.lightBackground;
     final cardColor = isDark ? AppTheme.darkCard : Colors.white;
-    final textColor = isDark ? Colors.white : Colors.black87;
     final bool hasDebt = _currentBalance > 0;
-    
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: Column(
+
+    return Container(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [primaryColor, primaryColor.withOpacity(0.7)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
         children: [
-          // Customer Header
-          Container(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [primaryColor, primaryColor.withOpacity(0.7)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      Expanded(
-                        child: Text(
-                          widget.customer.name,
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  child: Row(
-                    children: [
-                      Hero(
-                        tag: 'customer_${widget.customer.id}',
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: cardColor,
-                            borderRadius: BorderRadius.circular(16),
-                            image: widget.customer.photoPath != null
-                                ? DecorationImage(
-                                    image: FileImage(File(widget.customer.photoPath!)),
-                                    fit: BoxFit.cover,
-                                  )
-                                : null,
-                          ),
-                          child: widget.customer.photoPath == null
-                              ? Center(
-                                  child: Text(
-                                    widget.customer.name.isNotEmpty 
-                                        ? widget.customer.name[0].toUpperCase() 
-                                        : '?',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: primaryColor,
-                                    ),
-                                  ),
-                                )
-                              : null,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.phone, size: 14, color: Colors.white70),
-                                const SizedBox(width: 4),
-                                Text(
-                                  widget.customer.phone,
-                                  style: GoogleFonts.istokWeb(color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                            if (hasDebt) ...[
-                              const SizedBox(height: 4),
-                              InkWell(
-                                onTap: () async {
-                                  final phone = widget.customer.phone.replaceAll('+', '').replaceAll(' ', '');
-                                  final message = widget.strings.whatsappMsg
-                                      .replaceFirst('%s', widget.customer.name) // First %s is customer name
-                                      .replaceFirst('%s', 'Naya Potha')       // Second %s is sender name
-                                      .replaceFirst('%s', _currentBalance.toStringAsFixed(2)); // Third %s is amount
-                                  
-                                  final url = Uri.parse('https://wa.me/$phone?text=${Uri.encodeComponent(message)}');
-                                  if (await canLaunchUrl(url)) {
-                                    await launchUrl(url, mode: LaunchMode.externalApplication);
-                                  } else {
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Could not launch WhatsApp', style: GoogleFonts.poppins())),
-                                      );
-                                    }
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade600,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.message, size: 12, color: Colors.white),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        widget.strings.sendReminder,
-                                        style: GoogleFonts.poppins(color: Colors.white, fontSize: 10),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: hasDebt ? AppTheme.accentRed : AppTheme.accentGreen,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'Rs. ${_currentBalance.abs().toStringAsFixed(0)}',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Calculator Display
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-            color: cardColor,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  'Rs.',
-                  style: GoogleFonts.poppins(
-                    fontSize: 24,
-                    color: isDark ? Colors.white38 : Colors.grey.shade400,
-                    fontWeight: FontWeight.w300,
-                  ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
                 ),
-                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    _input,
-                    textAlign: TextAlign.right,
+                    widget.customer.name,
                     style: GoogleFonts.poppins(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          
-          // Keypad
-          Expanded(
-            flex: 5,
-            child: Container(
-              color: cardColor,
-              child: _buildKeypad(isDark, primaryColor),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            child: Row(
+              children: [
+                Hero(
+                  tag: 'customer_${widget.customer.id}',
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      image: widget.customer.photoPath != null
+                          ? DecorationImage(
+                              image: FileImage(File(widget.customer.photoPath!)),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: widget.customer.photoPath == null
+                        ? Center(
+                            child: Text(
+                              widget.customer.name.isNotEmpty
+                                  ? widget.customer.name[0].toUpperCase()
+                                  : '?',
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: primaryColor,
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.phone, size: 14, color: Colors.white70),
+                          const SizedBox(width: 4),
+                          Text(
+                            widget.customer.phone,
+                            style: GoogleFonts.istokWeb(color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                      if (hasDebt) ...[
+                        const SizedBox(height: 4),
+                        InkWell(
+                          onTap: () async {
+                            final phone = widget.customer.phone.replaceAll('+', '').replaceAll(' ', '');
+                            final message = widget.strings.whatsappMsg
+                                .replaceFirst('%s', widget.customer.name)
+                                .replaceFirst('%s', 'Naya Potha')
+                                .replaceFirst('%s', _currentBalance.toStringAsFixed(2));
+
+                            final url = Uri.parse('https://wa.me/$phone?text=${Uri.encodeComponent(message)}');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                            } else {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Could not launch WhatsApp', style: GoogleFonts.poppins())),
+                                );
+                              }
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade600,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.message, size: 12, color: Colors.white),
+                                const SizedBox(width: 4),
+                                Text(
+                                  widget.strings.sendReminder,
+                                  style: GoogleFonts.poppins(color: Colors.white, fontSize: 10),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: hasDebt ? AppTheme.accentRed : AppTheme.accentGreen,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Rs. ${_currentBalance.abs().toStringAsFixed(0)}',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          
-          // Transaction History
-          Expanded(
-            flex: 3,
-            child: _buildTransactionHistory(isDark, cardColor),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCalculatorDisplay(BuildContext context) {
+    final isDark = widget.isDarkMode;
+    final cardColor = isDark ? AppTheme.darkCard : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+      color: cardColor,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            'Rs.',
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              color: isDark ? Colors.white38 : Colors.grey.shade400,
+              fontWeight: FontWeight.w300,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _input,
+              textAlign: TextAlign.right,
+              style: GoogleFonts.poppins(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDarkMode;
+    final primaryColor = isDark ? AppTheme.primaryDark : AppTheme.primaryLight;
+    final bgColor = isDark ? AppTheme.darkBackground : AppTheme.lightBackground;
+    final cardColor = isDark ? AppTheme.darkCard : Colors.white;
+
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: Responsive.isMobile(context)
+          ? Column(
+              children: [
+                _buildHeader(context),
+                _buildCalculatorDisplay(context),
+                Expanded(
+                  flex: 5,
+                  child: Container(
+                    color: cardColor,
+                    child: _buildKeypad(isDark, primaryColor),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: _buildTransactionHistory(isDark, cardColor),
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    children: [
+                      _buildHeader(context),
+                      _buildCalculatorDisplay(context),
+                      Expanded(
+                        child: Container(
+                          color: cardColor,
+                          child: _buildKeypad(isDark, primaryColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(left: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade200)),
+                    ),
+                    child: _buildTransactionHistory(isDark, cardColor),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
