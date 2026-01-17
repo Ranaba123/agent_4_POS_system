@@ -55,18 +55,66 @@ lib/
 
 ### Installation
 
+
+#### 🔹 Option A: Terminal 
+
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/Thiveya-Ratnarajah/POS_System.git
-    cd pos_debtor_app
+    git clone https://github.com/Ranaba123/agent_4_POS_system.git
+    cd agent_4_POS_system
     ```
 
-2.  **Install dependencies**:
+2.  **Fetch all branches**:
+    ```bash
+    git fetch origin
+    ```
+    
+3.  **Checkout the required branch**:
+    ```bash
+    git checkout NayaPotha-V2
+    ```
+
+4.  **Navigate to the project directory**:
+    ```bash
+    cd pos_debtor_app_v2
+    ```
+    
+5.  **Install dependencies**:
     ```bash
     flutter pub get
     ```
 
-3.  **Run the application**:
+6.  **Run the application**:
+    ```bash
+    flutter run
+    ```
+
+
+#### 🔹 Option B: GitHub Desktop 
+
+1. **Clone the repository**
+   - Open GitHub Desktop  
+   - Click **File → Clone Repository**  
+   - Select this repository or paste:  
+     ```
+     https://github.com/Ranaba123/agent_4_POS_system.git
+     ```
+   - Click **Clone**
+
+2. **Switch to the required branch**
+   - In GitHub Desktop, click **Current Branch**  
+   - Select the branch NayaPotha-V2  
+   - Files for the selected version will appear automatically
+
+3. **Open the project in your IDE**
+   - Click **Repository → Open in your IDE**
+
+4. **Install dependencies**
+   ```bash
+   flutter pub get
+   ```
+
+5.  **Run the application**:
     ```bash
     flutter run
     ```
